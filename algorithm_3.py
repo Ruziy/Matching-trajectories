@@ -3,29 +3,24 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial.distance import directed_hausdorff
 
-def symmetry_coefficient(track1, track2, method='pearson'):
-    if method == 'pearson':
-        # Объединяем данные по времени (x-координате), используя внутреннее соединение
-        merged_data = pd.merge(track1, track2, on='x', suffixes=('_track1', '_track2'), how='inner')
-        
-        # Проверяем, есть ли общие точки
-        if not merged_data.empty:
-            # Если есть общие точки, проверяем на NaN и вычисляем коэффициент корреляции Пирсона
-            points1 = merged_data['y_track1'].values
-            points2 = merged_data['y_track2'].values
-            if np.std(points1) == 0 or np.std(points2) == 0:
-                return 0  # Если дисперсия нулевая, возвращаем коэффициент 0
-            correlation_coeff = np.corrcoef(points1, points2)[0, 1]
-            return abs(correlation_coeff) * 100  # Преобразуем в проценты
-        else:
-            # Если общих точек нет, используем расстояние Хаусдорфа
-            hausdorff_symmetry_coeff = hausdorff_symmetry(track1, track2)
-            return hausdorff_symmetry_coeff
-    elif method == 'hausdorff':
-        # Используем расстояние Хаусдорфа
-        return hausdorff_symmetry(track1, track2)
+# Функция для вычисления коэффициента симметрии методом Пирсона
+def pearson_symmetry(track1, track2):
+    # Объединяем данные по времени (x-координате), используя внутреннее соединение
+    merged_data = pd.merge(track1, track2, on='x', suffixes=('_track1', '_track2'), how='inner')
+    
+    # Проверяем, есть ли общие точки
+    if not merged_data.empty:
+        # Если есть общие точки, проверяем на NaN и вычисляем коэффициент корреляции Пирсона
+        points1 = merged_data['y_track1'].values
+        points2 = merged_data['y_track2'].values
+        if np.std(points1) == 0 or np.std(points2) == 0:
+            return 0  # Если дисперсия нулевая, возвращаем коэффициент 0
+        correlation_coeff = np.corrcoef(points1, points2)[0, 1]
+        return abs(correlation_coeff) * 100  # Преобразуем в проценты
+    else:
+        return 0  # Если общих точек нет, возвращаем 0
 
-
+# Функция для вычисления коэффициента симметрии методом Хаусдорфа
 def hausdorff_symmetry(track1, track2):
     # Вычисляем расстояние Хаусдорфа между двумя линиями
     distance1 = directed_hausdorff(track1[['x', 'y']].values, track2[['x', 'y']].values)[0]
@@ -37,12 +32,19 @@ def hausdorff_symmetry(track1, track2):
     
     return max(0, min(100, symmetry))
 
+# Функция для вычисления коэффициента симметрии с использованием выбранного метода
+def symmetry_coefficient(track1, track2, method='pearson'):
+    if method == 'pearson':
+        return pearson_symmetry(track1, track2)
+    elif method == 'hausdorff':
+        return hausdorff_symmetry(track1, track2)
+    else:
+        raise ValueError("Unsupported symmetry method. Supported methods are 'pearson' and 'hausdorff'.")
 
 # Функция для преобразования значения в интервал от 0 до 100%
 def transform_symmetry_coefficient(value):
     transformed_value = max(0, min(100, value))
     return transformed_value
-
 
 # Загрузим данные из CSV файла
 file_path = r'data\traks_x_y_1_2_3_4.csv'  # Укажите полный или относительный путь к вашему CSV файлу

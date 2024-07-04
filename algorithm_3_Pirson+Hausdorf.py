@@ -22,8 +22,10 @@ def symmetry_coefficient(track1, track2, method='pearson'):
             hausdorff_symmetry_coeff = hausdorff_symmetry(track1, track2)
             return hausdorff_symmetry_coeff
     elif method == 'hausdorff':
-        # Используем расстояние Хаусдорфа
-        return hausdorff_symmetry(track1, track2)
+        # Используем расстояние Хаусдорфа, нормализуем результат
+        hausdorff_symmetry_coeff = hausdorff_symmetry(track1, track2)
+        normalized_coeff = 100 - hausdorff_symmetry_coeff  # Нормализуем до 0-100%
+        return max(0, min(100, normalized_coeff))
 
 
 def hausdorff_symmetry(track1, track2):
