@@ -27,6 +27,7 @@ OPENCODE_TZ/
 ## Использование
 1.Поместите входной CSV файл с данными траекторий в папку data и назовите его traks.csv.
 2.Запустите скрипт algorithm.py с указанием пути к CSV файлу:
+
     ```bash
     python algorithm.py data\\traks.csv
     ```
